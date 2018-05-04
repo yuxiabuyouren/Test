@@ -15,8 +15,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from . import index_view
+from . import index_view, searchSuggest
 
 urlpatterns = [
     path('', index_view.index),
+    path('searchSuggest', searchSuggest.searchSuggest)
 ]

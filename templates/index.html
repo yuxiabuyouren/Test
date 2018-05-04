@@ -31,16 +31,22 @@
                             <div>
                                 <div class="input-group">
                                     {% if query %}
-                                    <input type="text" id="user_text" name="user_text" class="form-control" value="{{query}}" aria-describedby="basic-addon1">
+                                    <input type="text" id="user_text" name="user_text" class="form-control" value="{{query}}" aria-describedby="basic-addon1" autocomplete="off">
                                     {% else %}
-                                    <input type="text" id="user_text" name="user_text" class="form-control" placeholder="输入疾病名称" aria-describedby="basic-addon1">
+                                    <input type="text" id="user_text" name="user_text" class="form-control" placeholder="输入疾病名称[注意大小写]" aria-describedby="basic-addon1" autocomplete="off">
                                     {% endif %}
                                     <span class="btn btn-primary input-group-addon" type="submit" id="relationSearchButton" style="padding:6px 38px"
-                                        onclick="document.getElementById('searchRelationForm').submit();">查询</span>
+                                        onclick="document.getElementById('searchRelationForm').submit();">查询</span>  
                                 </div>
                             </div>
                         </form>
-
+                        <p>
+                            <div class="search_suggest" id="search_suggest" style="width: 85%">
+                                <ul class="list-group pre-scrollable">  
+                                </ul>  
+                            </div>
+                        </p>
+                        
                         <p>
                             {% if ctx %}
                             <div class = "col-md-12">
@@ -280,6 +286,49 @@
     $(".del").click(function(){
             var t=$("input:checked").parent().parent("tr").remove();//移除选中的行  
         });
+    </script>
+
+    <script type="text/javascript">
+
+    $(document).ready(function(){
+        $("#user_text").keyup(function(){
+            var suggestWrap = $('#search_suggest');
+            var input = $('#user_text'); 
+            suggestWrap.hide();
+            var q = $("#user_text").val();              
+            $.get("searchSuggest",{'q':q}, function(data){
+                console.log(data);
+                if(data.length<=0){  
+                    suggestWrap.hide();  
+                    return;  
+                }  
+                
+                //往搜索框下拉建议显示栏中添加条目并显示  
+                var li;  
+                var tmpFrag = document.createDocumentFragment();  
+                suggestWrap.find('ul').html('');  
+                for(var i=0; i<data.length; i++){  
+                    li = document.createElement('li'); 
+                    li.setAttribute("class", "list-group-item");
+                    li.innerHTML = data[i];  
+                    tmpFrag.appendChild(li);  
+                }  
+                suggestWrap.find('ul').append(tmpFrag);  
+                suggestWrap.show();  
+                
+                //为下拉选项绑定鼠标事件  
+                suggestWrap.find('li').hover(function(){  
+                    suggestWrap.find('li').removeClass('hover');  
+                    $(this).addClass('hover');  
+                },function(){  
+                    $(this).removeClass('hover');  
+                }).bind('click',function(){  
+                    input.val(this.innerHTML);  
+                    suggestWrap.hide();  
+                });  
+            })
+        });
+    });
     </script>
 </body>
 
