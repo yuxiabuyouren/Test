@@ -12,7 +12,6 @@ def index(request):
         path = "treat.nt"
         query = request.GET['user_text']
         diseases = re.split("[,，]", request.GET['user_text'])
-        print(diseases)
         for disease in diseases:
             links, nodes = getData(path, disease)
             if not nodes:
