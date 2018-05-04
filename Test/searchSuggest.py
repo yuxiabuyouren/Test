@@ -6,7 +6,6 @@ import re
 def searchSuggest(request):
     q = request.GET['q'].lower()
     key = re.split("[,，]", q)
-    print(key[-1])
     suggest = []
     with open("diseases.csv", encoding="utf-8") as f:
         for line in f:
