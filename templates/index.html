@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <!-- 引入 ECharts 文件 -->
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <link rel="stylesheet" href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <script src="/static/js/sidebar.js"></script>
+    <script src="/static/js/echarts.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <title>关系</title>
+    <div class="container">
+        <div class="col-md-12">
+            <h3 class="page-header"><i class="fa fa-share-alt" aria-hidden="true"></i> 关系查询 </h3>
+        </div>
+        <div class="row">
+            <!--head start-->
+            <div class="col-md-8">
+                <div class="row">
+                    <div class="col-md-12">
+
+                        <!--搜索框-->
+                        <form action="" method="get" id='searchRelationForm'>
+                            {% csrf_token %}
+                            <div>
+                                <div class="input-group">
+                                    {% if query %}
+                                    <input type="text" id="user_text" name="user_text" class="form-control" value="{{query}}" aria-describedby="basic-addon1">
+                                    {% else %}
+                                    <input type="text" id="user_text" name="user_text" class="form-control" placeholder="输入疾病名称" aria-describedby="basic-addon1">
+                                    {% endif %}
+                                    <span class="btn btn-primary input-group-addon" type="submit" id="relationSearchButton" style="padding:6px 38px"
+                                        onclick="document.getElementById('searchRelationForm').submit();">查询</span>
+                                </div>
+                            </div>
+                        </form>
+
+                        <p>
+                            {% if ctx %}
+                            <div class = "col-md-12">
+                                <div class="panel panel-default">
+                                    <div class = "panel-body" style="text-align: center">
+                                        <img src="/static/image/error.jpg">
+                                        <h2>您似乎来到了没有知识的荒原！</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+
+                            <!--relation start-->
+                            {% if context %} 
+                            <div class = "col-md-12">
+                                <ul id="myTab" class="nav nav-tabs">
+                                    {% for key,value in context.items %}
+                                    {% if forloop.first %}
+                                    <li class="active">
+                                    {% else %}
+                                    <li>
+                                    {% endif %}
+                                        <a href="#{{key}}" data-toggle="tab">
+                                            {{key}}
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                <div id="myTabContent" class="tab-content">
+                                    {% for key,value in context.items %}
+                                    {% if forloop.first %}
+                                    <div class="tab-pane fade in active" id="{{key}}">
+                                    {% else %}
+                                    <div class="tab-pane fade" id="{{key}}">
+                                    {% endif %}
+                                    
+                                        <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+                                        <div class="panel panel-default ">
+                                            <div class = "panel-body ">
+                                                <div id="draw_{{key}}" style="width: 550px;height:1000px;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </p>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="row">
+                    <div class="col-md-12">
+                        <ul class="nav nav-tabs">
+                            <li class="active" id="01">
+                                <a href="#">选中节点</a>
+                            </li>
+                            <li class="disabled" id="02">
+                                <a href="#">不良反应</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-12">
+                        <div id="01title">
+                            <table class="table table-striped table-hover table-condensed">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th style="text-align:center">id</th>
+                                        <th style="text-align:center">治疗阶段</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table> <button class="btn btn-danger btn-small btn-block del" type="button">删除</button>
+                        </div>
+                        </div>
+                        <!--div标签数随着用户点击节点数增加这个后面再做-->
+                        <div id="02title" style="display: none;">
+                            <div id="02title-1">
+                                不良反应xxxx（节点A*节点B）
+                                <button type="button" class="btn btn-default" id="02panel-1" style="float:right;">
+                                    <span class="glyphicon glyphicon-sort-by-attributes"></span>
+                                </button>
+                            </div>
+                            <div id="02panel-1">详细描述xxxx(这个他们药物实体还没有做，应该是填药物间不良反应的描述）</div>
+                            <!--不良反应描述-->
+                            <br>
+                            <br>
+                            <div id="02title-2">
+                                不良反应xxxx（节点C*节点D）
+                                <button type="button" class="btn btn-default" id="02panel-2" style="float:right;">
+                                    <span class="glyphicon glyphicon-sort-by-attributes"></span>
+                                </button>
+                            </div>
+                            <div id="02panel-2">详细描述xxxx</div>
+                            <!--不良反应描述-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if context %}
+        {% for key,value in context.items %}
+        <script type="text/javascript">
+            // 基于准备好的dom，初始化echarts实例
+            var myChart = echarts.init(document.getElementById("draw_{{key}}"));
+
+            // 指定图表的配置项和数据
+            var option = option = {
+                title: {
+                    text: ''
+                },
+                tooltip: {
+                    confine: true,
+                    formatter: function (param) {
+                        var html = "";
+                        if(param.color != "#aaa"){
+                            for (var index in param.data.value) {
+                                var arr = param.data.value[index].split("");
+                                for (var i = 0; i < Math.floor(param.data.value[index].length / 50); i++) {
+                                    arr.splice((i + 1) * 50, 0, "</br>")
+                                }
+                                //console.log(index)
+
+                                html += index + "：<br />" + arr.join("") + "<br />";
+                            }
+                        }else{
+                            var arr = param.name.split("");
+                            for (var i = 0; i < Math.floor(param.name.length / 50); i++) {
+                                arr.splice((i + 1) * 50, 0, "</br>")
+                            }
+                            html += "name: <br />" + arr.join("") + "<br />";
+
+                            var arr = param.value.split("");
+                            for (var i = 0; i < Math.floor(param.value.length / 50); i++) {
+                                arr.splice((i + 1) * 50, 0, "</br>")
+                            }
+                            html += "condition: <br />" + arr.join("") + "<br />";
+                        }
+                        
+                        return html;
+                    }
+                },
+                animationDurationUpdate: 1500,
+                animationEasingUpdate: 'quinticInOut',
+                legend: {
+                    x: "right",
+                    show: true,
+                    data: ["disease", "treatment", "drug"]
+                },
+                series: [{
+                    type: 'graph',
+                    layout: 'force',
+                    symbolSize: 50,
+                    focusNodeAdjacency: true,
+                    roam: true,
+                    categories: [{
+                        name: "disease"
+                    }, {
+                        name: "treatment"
+                    }, {
+                        name: "drug"
+                    }],
+                    label: {
+                        normal: {
+                            position: "top",
+                            show: true,
+                            formatter: function (params){
+                                if( params.name.length > 30)
+                                    return params.name.substring(0,30) + '...';
+                                else
+                                    return params.name;
+                            },
+                        }
+                    },
+                    force: {
+                        repulsion: 1500,
+                        edgeLength: 120
+                    },
+                    edgeSymbol: ['none', 'arrow'],
+                    edgeLabel: {
+                        normal: {
+                            show: true,
+                            formatter: function (params){
+                                if( params.value.length > 20)
+                                    return params.value.substring(0,20) + '...';
+                                else
+                                    return params.value;
+                            },
+                        }
+                    },
+                    data: {{ value.nodes | safe}},
+                    links: {{ value.links | safe}},
+                    lineStyle: {
+                        normal: {
+                            opacity: 0.9,
+                            width: 1,
+                            curveness: 0
+                        }
+                    }
+                }]
+            };
+
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+
+            myChart.on('click', function (params) {
+                // console.log(params);
+                var flag = true;
+                if(params.data.category == "treatment"){
+                    $('.table tr').find('td').each(function() {
+                        if ($(this).index() == "1") { // 假设要获取第一列的值
+                            // console.log($(this).text());
+                            if($(this).text() == params.data.id){
+                                flag = false;
+                            }
+                        }
+                    });
+                    if(flag){
+                        var tr = "<tr class='CaseRow'><td><input type='checkbox' /></td><td>" + params.data.id + "</td><td>" + params.name + "</td></tr>";
+                        $(".table").append(tr);//向table中追加tr
+                    } 
+                }  
+            });
+        </script>
+        {% endfor %}
+    {% endif %}
+
+    <script type="text/javascript">
+    $(".del").click(function(){
+            var t=$("input:checked").parent().parent("tr").remove();//移除选中的行  
+        });
+    </script>
+</body>
+
+
+
+</html>
