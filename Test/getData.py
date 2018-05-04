@@ -1,5 +1,4 @@
 from rdflib import Graph
-import pprint
 import queue
 
 def getData(path, disease_name):
