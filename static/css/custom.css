@@ -2,3 +2,10 @@
     vertical-align: middle;
     text-align: center;
 }
+
+html{ 
+    overflow-y:scroll;
+    font-family: "Droid Sans";
+    overflow:scroll;
+    overflow:-moz-scrollbars-vertical;
+}

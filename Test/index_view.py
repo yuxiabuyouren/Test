@@ -9,11 +9,11 @@ def index(request):
     # 进行查询
     if(request.GET):
         context = {}
-        path = "treat.nt"
-        query = request.GET['user_text']
-        diseases = re.split("[,，]", request.GET['user_text'])
+        query = request.GET['user_text'].rstrip(",")
+        diseases = re.split("[,，]", query)
         for disease in diseases:
-            links, nodes = getData(path, disease)
+            # print(disease)
+            links, nodes = getData(disease)
             if not nodes:
                 ctx= {'title': '<h1>数据库中暂未添加该实体或者查询式输入错误！</h1>'}
                 return render(request,"index.html",{'query': query, 'ctx':ctx})

@@ -15,9 +15,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from . import index_view, searchSuggest
+from . import index_view, getReaction
 
 urlpatterns = [
     path('', index_view.index),
-    path('searchSuggest', searchSuggest.searchSuggest)
+    path('getReaction', getReaction.getReaction)
 ]
