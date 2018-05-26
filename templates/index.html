@@ -290,8 +290,6 @@
                             <tbody>
                             </tbody>
                         </table> <button class="btn btn-danger btn-small btn-block del" type="button">删除</button>
-                        <HR style="border:1 dashed #987cb9" width="100%" color=#987cb9 SIZE=5>
-                        <h5><b>节点属性</b></h5>
                         <div class="node-info"></div>
                     </div>
                     <!--div标签数随着用户点击节点数增加这个后面再做-->
@@ -339,7 +337,7 @@
                 series: [{
                     type: 'graph',
                     layout: 'force',
-                    symbolSize: 50,
+                    symbolSize: 30,
                     focusNodeAdjacency: true,
                     roam: true,
                     categories: [{
@@ -362,8 +360,8 @@
                         }
                     },
                     force: {
-                        repulsion: 1500,
-                        edgeLength: 120
+                        repulsion: 200,
+                        edgeLength: 10
                     },
                     edgeSymbol: ['none', 'arrow'],
                     edgeLabel: {
@@ -408,7 +406,7 @@
                 }
                 
                 $('.node-info').empty();
-                $('.node-info').append("<table class='table table-bordered'><thead><tr><th style='text-align:center'>属性</th><th style='text-align:center'>值</th></tr></thead><tbody>" + html + "</tbody></table>");
+                $('.node-info').append("<HR style='border:1 dashed #987cb9' width='100%' color=#987cb9 SIZE=5><h5><b>节点属性</b></h5><table class='table table-bordered'><thead><tr><th style='text-align:center'>属性</th><th style='text-align:center'>值</th></tr></thead><tbody>" + html + "</tbody></table>");
 
                 var flag = true;
                 if(params.data.category == "treatment"){
