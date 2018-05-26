@@ -37,7 +37,7 @@ def getReaction(request):
         data["flag"] = True
     else:
         data["flag"] = False
-    print(reactions)
+    # print(reactions)
     return HttpResponse(json.dumps(data), content_type='application/json')
 
 def getReaction1(request):

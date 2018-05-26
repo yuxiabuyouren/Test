@@ -19,11 +19,11 @@ $(function(){
         snodes.trim();
         console.log(snodes);
         //如果不存在用药，则不存在冲突
-        if(num > 0){
+        if(num > 1){
             $.get("getReaction", {"snodes": snodes}, function(data){
-                console.log(data.flag);
                 if(!data.flag){
-                    $("div#reactions").html("<img src='static/image/reaction.jpg' style='margin-top:5px><h4>所选节点无不良相互作用</h4>");
+                    //console.log("hello");
+                    $("div#reactions").html("<img src='static/image/reaction.jpg' class='img-thumbnail' style='margin-top:5px'><h4>所选节点无不良相互作用</h4>");
                 }else{
                     for(var treatments in data.reactions){
                         html = "";
