@@ -39,21 +39,3 @@ def getReaction(request):
         data["flag"] = False
     # print(reactions)
     return HttpResponse(json.dumps(data), content_type='application/json')
-
-def getReaction1(request):
-    treatments = defaultdict(dict)
-    snodes = request.split("/t")
-    print(len(snodes))
-    for snode in snodes:
-        items = snode.split("/")
-        treatment = items[0]
-        drugs = items[1].split(";")
-        for drug in drugs:
-            drug_name, elem = drug.split(",")
-            treatments[treatment][drug_name] = elem
-    
-    print(treatments)
-
-if __name__ == "__main__":
-    request = "referral and interim management/adrenalin,DB11124    information and support before discharge/adrenalin,DB11124"
-    getReaction1(request)
