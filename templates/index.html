@@ -277,8 +277,8 @@
                 </ul>
 
                 <div id="myTabContent" class="tab-content">
-                    <div class="tab-pane fade in active" id="selected">
-                        <table class="table table-bordered" id="select-node" style="margin-top: 5px">
+                    <div class="tab-pane fade in active" id="selected" style="width: 350px;word-break: break-all;">
+                        <table class="table table-bordered" id="select-node" style="margin-top: 5px;">
                             <thead>
                                 <tr>
                                     <th></th>
@@ -396,7 +396,7 @@
                 drugs = "";
                 for(var index in params.data.value){
                     if(index != "drug"){
-                        html += "<tr><td>" + index + "</td><td>" + params.data.value[index] + "</td></tr>";
+                        html += "<tr><td style='width:60px'>" + index + "</td><td>" + params.data.value[index] + "</td></tr>";
                     }else{
                         for(var d in params.data.value["drug"])
                             drugs += d + "," + params.data.value["drug"][d] + ";";
@@ -419,7 +419,7 @@
                         }
                     });
                     if(flag){
-                        var tr = "<tr class='CaseRow'><td><input type='checkbox' /></td><td>" + params.data.id + "</td><td>" + params.name + "</td><td>" + drugs + "</td></tr>";
+                        var tr = "<tr class='CaseRow'><td><input type='checkbox' /></td><td style='width:60px'>" + params.data.id + "</td><td>" + params.name + "</td><td>" + drugs + "</td></tr>";
                         $("#select-node").append(tr);//向table中追加tr
                     } 
                 }  
