@@ -396,7 +396,7 @@
                 drugs = "";
                 for(var index in params.data.value){
                     if(index != "drug"){
-                        html += "<tr><td style='width:80px'>" + index + "</td><td>" + params.data.value[index] + "</td></tr>";
+                        html += "<tr><td style='width:85px'>" + index + "</td><td>" + params.data.value[index] + "</td></tr>";
                     }else{
                         for(var d in params.data.value["drug"])
                             drugs += d + "," + params.data.value["drug"][d] + ";";
