@@ -25,11 +25,14 @@ $(function(){
                     //console.log("hello");
                     $("div#reactions").html("<img src='static/image/reaction.jpg' class='img-thumbnail' style='margin-top:5px'><h4>所选节点无不良相互作用</h4>");
                 }else{
+                    count = 0;
                     for(var treatments in data.reactions){
+                        count++;
                         html = "";
-                        for(var prop in data.reactions[treatments])
+                        for(var prop in data.reactions[treatments]){
                             html += "<tr><td>" + prop + "</td><td>" + data.reactions[treatments][prop] + "</td></tr>";
-                        $("div#reactions").append("<h4>" + treatments + "</h4><table class='table  table-bordered' style='margin-top:5px'><thead><tr><th style='text-align:center'>属性</th><th style='text-align:center'>值</th></tr></thead><tbody>" + html + "</tbody></table><HR style='border:1 dashed #987cb9' width='100%' color=#987cb9 SIZE=5>");
+                        }  
+                        $("div#reactions").append("<h4>" + count + "." + treatments + "</h4><table class='table  table-bordered' style='margin-top:5px'><thead><tr><th style='text-align:center'>属性</th><th style='text-align:center'>值</th></tr></thead><tbody>" + html + "</tbody></table><HR style='border:1 dashed #987cb9' width='100%' color=#987cb9 SIZE=5>");
                     }
                 }
             })
