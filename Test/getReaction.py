@@ -7,7 +7,7 @@ def getReaction(request):
     treatments = []
     reactions = defaultdict(dict)
     snodes = request.GET['snodes'].strip().split("\t")
-    print(len(snodes))
+    #print(len(snodes))
     for snode in snodes:
         items = snode.rstrip(";").split("/")
         treatment = items[0]
