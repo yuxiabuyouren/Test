@@ -304,10 +304,10 @@
         {% for key,value in context.items %}
         <script type="text/javascript">
             // 基于准备好的dom，初始化echarts实例
-            var myChart = echarts.init(document.getElementById("draw_{{key}}"));
+            var myChart_{{key}} = echarts.init(document.getElementById("draw_{{key}}"));
 
             // 指定图表的配置项和数据
-            var option = option = {
+            var option = {
                 title: {
                     text: ''
                 },
@@ -316,6 +316,7 @@
                     position: 'bottom',
                     formatter: function (param) {
                         var html = "";
+                        // console.log(param);
                         if(param.color != "#aaa"){
                             for (var index in param.data.value) {
                                 if(index != "description" && index != "intention" && index != "drug"){
@@ -324,7 +325,7 @@
                             }
                         
                             return "<table border='2'>" + html + "</table>";
-                        }   
+                        }  
                     }
                 },
                 animationDurationUpdate: 1500,
@@ -350,12 +351,20 @@
                     label: {
                         normal: {
                             position: "bottom",
-                            show: true,
+                            show: false,
+                            // show: false,
+                            // formatter: function (params){
+                            //     // console.log(params);
+                            //     return params.data.id;
+                            // }
                             formatter: function (params){
-                                if( params.name.length > 30)
-                                    return params.name.substring(0,30) + '...';
-                                else
-                                    return params.name;
+                                if(params.color != "#aaa"){
+                                    if( params.name.length > 10)
+                                        return params.name.substring(0,10) + '...';
+                                    else
+                                        return params.name;
+                                }
+                                
                             },
                         }
                     },
@@ -367,11 +376,13 @@
                     edgeLabel: {
                         normal: {
                             show: true,
+                            // show: false,
                             formatter: function (params){
-                                if( params.value.length > 20)
+                                // console.log(params);
+                                if( params.value != "None")
                                     return params.value.substring(0,20) + '...';
                                 else
-                                    return params.value;
+                                    return "";
                             },
                         }
                     },
@@ -388,40 +399,130 @@
             };
 
             // 使用刚指定的配置项和数据显示图表。
-            myChart.setOption(option);
+            myChart_{{key}}.setOption(option);
+            
+            function reverseString(str) { 
+                return str.split("").reverse().join(""); 
+            }
 
-            myChart.on('click', function (params) {
-                //console.log(params);
-                html = "";
-                drugs = "";
-                for(var index in params.data.value){
-                    if(index != "drug"){
-                        html += "<tr><td style='width:85px'>" + index + "</td><td>" + params.data.value[index] + "</td></tr>";
-                    }else{
-                        for(var d in params.data.value["drug"])
-                            drugs += d + "," + params.data.value["drug"][d] + ";";
-                        drugs = drugs.trim();
-                        html += "<tr><td>" + index + "</td><td style='max-height: 100px;overflow: hidden;'>" + drugs + "</td></tr>";
-                    }  
+            function openOrFold(dataId, myChart){
+                var linksNodes=[];//中间变量  
+                var option = myChart.getOption();//获取已生成图形的Option
+                console.log(option);
+                var cates = ["disease", "treatment", "drug"];
+                var nodesOption = option.series[0].data;//获得所有节点的数组
+                var linksOption = option.series[0].links;//获得所有连接的数组
+                var id2Index = new Array();
+                var linksDict = new Array();
+
+                for(var n in nodesOption){
+                    id2Index[nodesOption[n].id] = n;
                 }
-                
-                $('.node-info').empty();
-                $('.node-info').append("<HR style='border:1 dashed #987cb9' width='100%' color=#987cb9 SIZE=5><h5><b>节点属性</b></h5><table class='table table-bordered'><thead><tr><th style='text-align:center'>属性</th><th style='text-align:center'>值</th></tr></thead><tbody>" + html + "</tbody></table>");
 
-                var flag = true;
-                if(params.data.category == "treatment"){
-                    $('#select-node').find('td').each(function() {
-                        if ($(this).index() == "1") { // 假设要获取第一列的值
-                            // console.log($(this).text());
-                            if($(this).text() == params.data.id){
-                                flag = false;
-                            }
+                for(let m in linksOption){
+                    //引用的连接关系的目标，既父节点是当前节点
+                    var source = id2Index[linksOption[m].source];
+                    var target = id2Index[linksOption[m].target];
+                    if(linksDict[source] === undefined){
+                        linksDict[source] = new Array();
+                    }
+                    linksDict[source].push(target);
+                }              
+
+                // console.log(linksDict);
+                
+                /**
+                遍历连接关系数组
+                最终获得所选择节点的一层子节点
+                */
+                //先判断是要展开还是闭合：如果有一个category为正，则闭合；否则扩展一层    。
+                var index = id2Index[dataId];
+                var saved = [];
+                var linksNodes = linksDict[index];
+                var unsaved = [];
+
+                for(var id in linksDict[index]){
+                    unsaved.push(linksDict[index][id]);
+                }
+
+                while(unsaved != undefined && unsaved.length != 0){
+                    var cur = unsaved.shift();
+                    if(saved.indexOf(cur) < 0)
+                        saved.push(cur);
+                
+                    for(var id in linksDict[cur]){
+                        if(unsaved.indexOf(linksDict[cur][id]) < 0)
+                            unsaved.push(linksDict[cur][id]);
+                    }
+                    // console.log(unsaved);
+                }
+
+                if(saved != null && saved != undefined){
+                    expend = true;
+                    for (var p in saved) {
+                        if(cates.indexOf(nodesOption[saved[p]].category) >= 0 ){
+                            expend = false;
+                            nodesOption[saved[p]].category = reverseString(nodesOption[saved[p]].category);
                         }
-                    });
-                    if(flag){
-                        var tr = "<tr class='CaseRow'><td><input type='checkbox' /></td><td style='width:60px'>" + params.data.id + "</td><td>" + params.name + "</td><td>" + drugs + "</td></tr>";
-                        $("#select-node").append(tr);//向table中追加tr
-                    } 
+                        // nodesOption[saved[p]].category = reverseString(nodesOption[saved[p]].category); //顺便使所有的值一致,全置为负值。因为关闭全关闭，展开只展开一层（特例）下面做处理就好、
+                    }
+                    
+                    if(expend){ //展开 一层
+                        for ( var p in linksNodes) {
+                            nodesOption[linksNodes[p]].category = reverseString(nodesOption[linksNodes[p]].category);
+                        }
+                    }
+                }
+                //重绘
+                myChart.setOption(option);
+            }
+
+            document.oncontextmenu = function(){ return false; };
+            openOrFold(0, myChart_{{key}});
+            openOrFold(0, myChart_{{key}});
+
+            myChart_{{key}}.on('contextmenu', function(param){
+                var data = param.data;//表示当前选择的某一节点
+                if(data != null && data != undefined){
+                    openOrFold(data.id, this);
+                }
+            });
+
+            myChart_{{key}}.on('click', function (params) {
+                if(params.color != "#aaa"){
+                    //console.log(params);
+                    
+                    html = "";
+                    drugs = "";
+                    for(var index in params.data.value){
+                        if(index != "drug"){
+                            html += "<tr><td style='width:85px'>" + index + "</td><td>" + params.data.value[index] + "</td></tr>";
+                        }else{
+                            for(var d in params.data.value["drug"])
+                                drugs += d + "," + params.data.value["drug"][d] + ";";
+                            drugs = drugs.trim();
+                            html += "<tr><td>" + index + "</td><td style='max-height: 100px;overflow: hidden;'>" + drugs + "</td></tr>";
+                        }  
+                    }
+                    
+                    $('.node-info').empty();
+                    $('.node-info').append("<HR style='border:1 dashed #987cb9' width='100%' color=#987cb9 SIZE=5><h5><b>节点属性</b></h5><table class='table table-bordered'><thead><tr><th style='text-align:center'>属性</th><th style='text-align:center'>值</th></tr></thead><tbody>" + html + "</tbody></table>");
+
+                    var flag = true;
+                    if(params.data.category == "treatment"){
+                        $('#select-node').find('td').each(function() {
+                            if ($(this).index() == "1") { // 假设要获取第一列的值
+                                // console.log($(this).text());
+                                if($(this).text() == params.data.id){
+                                    flag = false;
+                                }
+                            }
+                        });
+                        if(flag){
+                            var tr = "<tr class='CaseRow'><td><input type='checkbox' /></td><td style='width:60px'>" + params.data.id + "</td><td>" + params.name + "</td><td>" + drugs + "</td></tr>";
+                            $("#select-node").append(tr);//向table中追加tr
+                        } 
+                    }
                 }  
             });
         </script>
@@ -436,25 +537,9 @@
     <script src="/static/docsupport/init.js" type="text/javascript" charset="utf-8"></script>
     <script>
         $('.tp').typeIt({
-            whatToType: ["我和宇宙之间有必然的联系吗？", "宇宙是否有尽头？", "时间是否有长短？", "过去的时间在哪里消失？", "未来的时间又在何处停止？", "我在这一刻提出的问题", "还是你刚才所看到的问题吗？"],
+            whatToType: ["世界上最遥远的距离", "不是生与死", "不是天各一方", "而是我差了一分", "你却不知道我被卡绩", "人间有真情，人间有真爱", "求老师再给我一分!"],
             typeSpeed: 100
         });
     </script>
-
-    <!-- {% if query %}
-    <script>
-        var ss = "{{ query }}".split(",");
-        //console.log(ss);
-        $("option").each(function(){
-            //console.log($(this).text());
-            for(var i = 0; i < ss.length; i++){
-                if($(this).text() === ss[i]){
-                    $(this).contents().unwrap().wrap('<option selected/>');
-                    break;
-                }
-            }
-        })
-    </script>
-    {% endif %} -->
 </body>
 </html>
